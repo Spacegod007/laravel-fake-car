@@ -2,7 +2,9 @@
 
 @section("content")
 
-    <form method="post" action="{{route("cars.store")}}">
+    <form method="post" action="{{route("cars.store", $userId)}}">
+        <input type="hidden" name="user_id" value="{{$userId}}">
+
         <label for="brand">Brand</label>
         <input id="brand" type="text" name="brand" placeholder="The brand of the car">
 

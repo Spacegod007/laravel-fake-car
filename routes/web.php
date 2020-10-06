@@ -15,8 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource("cars", CarController::class);
 Route::resource("users", UserController::class);
+
+Route::prefix("users/{user}")->group(function () {
+    Route::resource("cars", CarController::class);
+});
+
 
 //Route::get('/', function () {
 //    return view('welcome');

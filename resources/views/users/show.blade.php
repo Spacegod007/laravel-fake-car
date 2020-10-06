@@ -27,4 +27,18 @@
         <input type="submit" value="Back">
     </form>
 
+    <h3>{{$user->name}}'s cars</h3>
+
+    <form method="get" action="{{route("cars.create", $user->id)}}">
+        <input type="submit" value="Add car">
+    </form>
+
+    <ul>
+        @foreach($user->cars as $car)
+            <li>
+                <a href="{{route("cars.show", [$user->id, $car->id])}}">{{$car->brand}} {{$car->type}}</a>
+            </li>
+        @endforeach
+    </ul>
+
 @endsection

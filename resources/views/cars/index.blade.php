@@ -4,17 +4,17 @@
 
     <h1>Cars</h1>
 
-    <lu>
+    <ul>
     @foreach($cars as $car)
         <li>
-            <a href="{{route("cars.show", $car->id)}}">{{$car->brand}} {{$car->type}}</a>
+            <a href="{{route("cars.show", [$userId, $car->id])}}">{{$car->brand}} {{$car->type}}</a>
         </li>
     @endforeach
-    </lu>
+    </ul>
 
     <br>
 
-    <form method="get" action="{{route("cars.create")}}">
+    <form method="get" action="{{route("cars.create", $userId)}}">
         <input type="submit" value="New car">
     </form>
 @endsection

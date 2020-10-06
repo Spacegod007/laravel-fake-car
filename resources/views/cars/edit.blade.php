@@ -2,7 +2,7 @@
 
 @section("content")
 
-    <form method="post" action="{{route("cars.update", $car->id)}}">
+    <form method="post" action="{{route("cars.update", [$userId, $car->id])}}">
         <input type="hidden" name="_method" value="put">
 
         <label for="brand">Brand</label>
