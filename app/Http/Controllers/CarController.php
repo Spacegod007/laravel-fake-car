@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Car;
+use App\Services\CarService;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CarController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
-     */
-    public function index($userId)
-    {
-        $cars = Car::all();
-        return view("cars.index", ["userId" => $userId, "car" => $cars]);
+    private $service;
 
+    public function __construct(CarService $service)
+    {
+        $this->service = $service;
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function create($userId)
     {
@@ -32,17 +32,12 @@ class CarController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
     public function store($userId, Request $request)
     {
-//        $brand = $request->get("brand");
-//        $type = $request->get("type");
-//        Car::create(["brand" => $brand, "type" => $type, "user_id" => $userId]);
-
-        Car::create($request->all());
-
+        $this->service->create($request->only(["brand", "type", "user_id"]));
         return redirect()->route("users.show", $userId);
     }
 
@@ -50,11 +45,11 @@ class CarController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function show($userId, $id)
     {
-        $car = Car::findOrFail($id);
+        $car = $this->service->get($id);
         return view("cars.show", ["userId" => $userId, "car" => $car]);
 
     }
@@ -63,26 +58,25 @@ class CarController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function edit($userId, $id)
     {
-        $car = Car::findOrFail($id);
+        $car = $this->service->get($id);
         return view("cars.edit", ["userId" => $userId, "car" => $car]);
-
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function update($userId, Request $request, $id)
     {
-        $car = Car::findOrFail($id);
-        $car->update($request->all());
+        $this->service->update($id, $request->only(["brand", "type", "user_id"]));
+
         return redirect()->route("cars.show", [$userId, $id]);
     }
 
@@ -90,17 +84,11 @@ class CarController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function destroy($userId, $id)
     {
-        Car::findOrFail($id)->delete();
+        $this->service->delete($id);
         return redirect()->route("users.show", $userId);
-    }
-
-    public function getOwner($id)
-    {
-        $car = Car::findOrFail($id);
-        return $car->owner;
     }
 }

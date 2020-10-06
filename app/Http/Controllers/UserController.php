@@ -2,26 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Services\UserService;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
+    private $service;
+
+    public function __construct(UserService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function index()
     {
-        $users = User::all();
+        $users = $this->service->getAll();
         return view("users.index", compact("users"));
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function create()
     {
@@ -31,12 +43,12 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
-        User::create($request->all());
+        $this->service->create($request->only(["name", "email", "password"]));
         return redirect()->route("users.index");
     }
 
@@ -44,11 +56,11 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        $user = $this->service->get($id);
         return view("users.show", compact("user"));
     }
 
@@ -56,25 +68,24 @@ class UserController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
+     * @return Application|Factory|View|Response
      */
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = $this->service->get($id);
         return view("users.edit", compact("user"));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $user->update($request->all());
+        $this->service->update(id, $request->only("name", "email"));
         return redirect()->route("users.show", $id);
     }
 
@@ -82,17 +93,11 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function destroy($id)
     {
-        User::findOrFail($id)->delete();
+        $this->service->delete($id);
         return redirect()->route("users.index");
-    }
-
-    public function getCars($id)
-    {
-        $user = User::findOrfail($id);
-        return $user->cars;
     }
 }
